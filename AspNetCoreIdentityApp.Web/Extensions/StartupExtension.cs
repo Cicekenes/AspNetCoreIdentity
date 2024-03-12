@@ -2,6 +2,7 @@
 using AspNetCoreIdentityApp.Web.Localizations;
 using AspNetCoreIdentityApp.Web.Models.DatabaseContexts;
 using AspNetCoreIdentityApp.Web.Models.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreIdentityApp.Web.Extensions
@@ -10,6 +11,12 @@ namespace AspNetCoreIdentityApp.Web.Extensions
     {
         public static void AddIdentityWithExt(this IServiceCollection services)
         {
+
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromHours(2);
+            });
+
             services.AddIdentity<AppUser, AppRole>(options =>
             {
                 options.User.RequireUniqueEmail = true; //Mail adresi eşsiz olsun.
@@ -26,7 +33,9 @@ namespace AspNetCoreIdentityApp.Web.Extensions
               .AddPasswordValidator<PasswordValidator>()
               .AddUserValidator<UserValidator>()
               .AddErrorDescriber<LocalizationIdentityErrorDescriber>()
+              .AddDefaultTokenProviders() //default token değeri örnek : şifre yenileme linki 2 saat geçerli olsun.
               .AddEntityFrameworkStores<AppDbContext>();
+             
 
         }
     }

@@ -4,7 +4,10 @@ NormalizedUserName : Veritabanında indekslenmiş sutünlardır. Hızlı arama y
 
 LockoutEnabled : Kullanıcı kilitli mi ?
 LockoutEnd : Kullanıcı kilitli kalma süresi
-//AccessFailedCount : Kaç kez hatalı giriş yaptı.
+AccessFailedCount : Kaç kez hatalı giriş yaptı.
+SecurityStamp : Otomatik logout işlemi için vardır. Cookie ile 30 dakikada bir karşılaştırır.
+
+ConcurrencyStamp:Eş zamanlı problem. Her güncellemede güncellenir. Identity ile alakalı bir konu değildir. kullanıcı adı değiştirildiği varsayalım. Kullanıcı değişiklik yaptığı zaman bir uyarı verir.
 
 2-AspNetRoles:
 
