@@ -1,0 +1,18 @@
+﻿@if (User.Identity.IsAuthenticated) //Login ise bu taglar gözüksün..
+{
+    <ul class="navbar-nav me-0">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Sayın @User.Identity.Name
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout">Çıkış Yap</a></li>
+            </ul>
+        </li>
+    </ul>
+}
+else
+{
+    <a asp-controller="Home" asp-action="SignIn" class="btn btn-outline-warning mx-1" type="submit">Üye Giriş</a>
+    <a asp-controller="Home" asp-action="SignUp" class="btn btn-outline-success" type="submit">Üye Kayıt</a>
+}

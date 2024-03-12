@@ -1,0 +1,29 @@
+﻿1-AspNetUsers :
+
+NormalizedUserName : Veritabanında indekslenmiş sutünlardır. Hızlı arama yapmamızı sağlar.
+
+LockoutEnabled : Kullanıcı kilitli mi ?
+LockoutEnd : Kullanıcı kilitli kalma süresi
+//AccessFailedCount : Kaç kez hatalı giriş yaptı.
+
+2-AspNetRoles:
+
+ConcurrencyStamp:
+
+3-AspNetUserClaims 
+
+Kullanıcı hakkında tutacağımız bilgilerdir. Bir kullanıcının üzerinden yetkilendirme yapmak istediğimiz için bu tablo oluşturulmuştur. Örnek İstanbul city'sine sahip kullanıcılar x sayfasını görsün.
+
+3.parti yazılımlarla alakalı claimleri'de burada tutuyoruz.
+
+4-AspNetRoleClaims 
+
+Role bazlı yetkilendirme yapmak maksadıyla oluşturulmuştur. Örnek olarak manager,moderatör vs..
+
+5-AspNetUserLogins
+
+Facebook ile giriş yap, google ile giriş yap dediğimizde bu tabloyu kullanırız.
+
+6-AspNetUserTokens
+
+Kullanıcı hakkında tutabileceğimiz tokenları burada tutabiliriz. Google,Facebook tokenları, Access token, Refresh Token vs...
