@@ -40,6 +40,10 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> SignIn(SignInViewModel signInViewModel, string returnUrl = null)
         {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
 
             returnUrl = returnUrl ?? Url.Action("Privacy", "Home");
 
@@ -145,7 +149,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             var hasUser = await _userManager.FindByIdAsync(userId);
             if (hasUser == null)
             {
-                ModelStateExtensions.AddModelErrorList(ModelState, new() { "Kullanýcý bulunamamýþtýr" });
+                ModelStateExtensions.AddModelErrorList(ModelState, new List<string>() { "Kullanýcý bulunamamýþtýr" });
                 return View();
             }
 
