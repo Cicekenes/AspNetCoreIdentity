@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using AspNetCoreIdentityApp.Web.Extensions;
 using AspNetCoreIdentityApp.Web.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
@@ -54,12 +56,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 ModelState.AddModelError(string.Empty, "Email veya þifre yanlýþ");
                 return View();
             }
-            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, signInViewModel.Password, signInViewModel.RememberMe, true); //4.parametre lockout iþlemi içindir.
 
-            if (signInResult.Succeeded)
-            {
-                return Redirect(returnUrl);
-            }
+
+            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, signInViewModel.Password, signInViewModel.RememberMe, true); //4.parametre lockout iþlemi içindir.
 
             if (signInResult.IsLockedOut)
             {
@@ -67,9 +66,18 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return View();
             }
 
-            ModelStateExtensions.AddModelErrorList(ModelState, new List<string>() { "Email veya þifreniz yanlýþ", $" (Baþarýsýz giriþ sayýsý={await _userManager.GetAccessFailedCountAsync(hasUser)})" });
+            if (!signInResult.Succeeded)
+            {
+                ModelStateExtensions.AddModelErrorList(ModelState, new List<string>() { "Email veya þifreniz yanlýþ", $" (Baþarýsýz giriþ sayýsý={await _userManager.GetAccessFailedCountAsync(hasUser)})" });
+                return View();
+            }
 
-            return View();
+
+            if (!string.IsNullOrEmpty(hasUser.BirthDate.ToString()))
+            {
+                await _signInManager.SignInWithClaimsAsync(hasUser, signInViewModel.RememberMe, new[] { new Claim("birthdate", hasUser.BirthDate.ToString()) });
+            }
+            return Redirect(returnUrl);
         }
 
         public IActionResult SignUp()
@@ -87,15 +95,29 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }
             var identityResult = await _userManager.CreateAsync(new AppUser() { UserName = request.UserName, Email = request.Email, PhoneNumber = request.Phone }, request.PasswordConfirm);
 
-            if (identityResult.Succeeded)
+            if (!identityResult.Succeeded)
             {
-                TempData["SuccessMessage"] = "Üyelik kayýt iþlemi baþarýyla gerçekleþmiþtir.";
-                return RedirectToAction(nameof(HomeController.SignUp));
+                ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
+                return View();
             }
 
-            ModelStateExtensions.AddModelErrorList(ModelState, identityResult.Errors.Select(x => x.Description).ToList());
+            // Ýlk kez kayýt olduysa 10 gün boyunca x sayfasýna eriþim yetkisi bulunsun.
+            var exchangeExpireClaim = new Claim("ExchangeExpireDate", DateTime.Now.AddDays(10).ToString());
 
-            return View();
+            var user = await _userManager.FindByNameAsync(request.UserName);
+
+            var claimResult = await _userManager.AddClaimAsync(user, exchangeExpireClaim);
+
+            if (!claimResult.Succeeded)
+            {
+                ModelState.AddModelErrorList(claimResult.Errors.Select(x => x.Description).ToList());
+                return View();
+            }
+
+            TempData["SuccessMessage"] = "Üyelik kayýt iþlemi baþarýyla gerçekleþmiþtir.";
+            return RedirectToAction(nameof(HomeController.SignUp));
+
+
         }
 
         public IActionResult ForgetPassword()
@@ -115,7 +137,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
 
-            var passwordResetLink = Url.Action(nameof(ResetPassword),"Home", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme, "localhost:7076");
+            var passwordResetLink = Url.Action(nameof(ResetPassword), "Home", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme, "localhost:7076");
 
             //EmailService
 
@@ -141,7 +163,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             var userId = TempData["userId"].ToString();
             var token = TempData["token"].ToString();
 
-            if(userId is null || token is null)
+            if (userId is null || token is null)
             {
                 throw new Exception("Bir hata meydana geldi.");
             }
@@ -153,7 +175,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return View();
             }
 
-            var result = await _userManager.ResetPasswordAsync(hasUser,token,request.Password);
+            var result = await _userManager.ResetPasswordAsync(hasUser, token, request.Password);
 
             if (result.Succeeded)
             {
@@ -161,7 +183,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }
             else
             {
-                ModelStateExtensions.AddModelErrorList(ModelState,result.Errors.Select(x=>x.Description).ToList());
+                ModelStateExtensions.AddModelErrorList(ModelState, result.Errors.Select(x => x.Description).ToList());
             }
 
             return View();

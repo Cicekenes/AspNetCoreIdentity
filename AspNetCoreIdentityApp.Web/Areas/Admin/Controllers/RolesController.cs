@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize("Admin")]
+    //[Authorize("Admin")]
     public class RolesController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
@@ -21,7 +21,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             _roleManager = roleManager;
         }
 
-        [Authorize(Roles = "role-action")]
+        //[Authorize(Roles = "role-action")]
         public async Task<IActionResult> Index()
         {
             var roles = await _roleManager.Roles.Select(x => new RoleListViewModel()
@@ -32,7 +32,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             return View(roles);
         }
 
-        [Authorize(Roles ="role-action")]
+        //[Authorize(Roles ="role-action")]
         public IActionResult RoleCreate()
         {
             return View();
@@ -51,7 +51,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             TempData["SuccessMessage"] = "Rol oluşturulmuştur";
             return RedirectToAction(nameof(RolesController.Index));
         }
-        [Authorize(Roles = "role-action")]
+        //[Authorize(Roles = "role-action")]
         public async Task<IActionResult> RoleUpdate(string id)
         {
             var roleUpdate = await _roleManager.FindByIdAsync(id);
@@ -77,7 +77,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             ViewData["SuccessMessage"] = "Rol bilgisi güncellenmiştir";
             return View();
         }
-        [Authorize(Roles = "role-action")]
+        //[Authorize(Roles = "role-action")]
         public async Task<IActionResult> RoleDelete(string id)
         {
             var roleToDelete = await _roleManager.FindByIdAsync(id);
